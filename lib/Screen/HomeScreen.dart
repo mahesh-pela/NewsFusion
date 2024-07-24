@@ -1,15 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:news_fusion/Screen/Widgets/NewsContainer.dart';
+import 'package:news_fusion/controller/fetchNews.dart';
 
-class Homescreen extends StatelessWidget {
+class Homescreen extends StatefulWidget {
+  @override
+  State<Homescreen> createState() => _HomescreenState();
+}
+
+class _HomescreenState extends State<Homescreen> {
+  @override
+  void initState() {
+    FetchNews.fetchNews();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageView.builder(
         scrollDirection: Axis.vertical,
         //to start the page from the specific page
-        controller: PageController(initialPage: 5),
+        // controller: PageController(initialPage: 5),
         itemBuilder: (context, index) {
           return NewsContainer(
               imgUrl: "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/JG4MZ2LKX5MAHEKSPILWEGD3C4.jpg",
