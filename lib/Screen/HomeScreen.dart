@@ -1,7 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:news_fusion/Screen/Widgets/NewsContainer.dart';
-import 'package:news_fusion/controller/fetchNews.dart';
+
+import '../controller/fetchNews.dart';
+import 'Widgets/NewsContainer.dart';
+    // Ensure you import the correct file path
 
 class Homescreen extends StatefulWidget {
   @override
@@ -9,26 +10,43 @@ class Homescreen extends StatefulWidget {
 }
 
 class _HomescreenState extends State<Homescreen> {
+  late Future<List<NewsArticle>> _newsArticles;
+
   @override
   void initState() {
-    FetchNews.fetchNews();
     super.initState();
+    _newsArticles = FetchNews.fetchNews();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView.builder(
-        scrollDirection: Axis.vertical,
-        //to start the page from the specific page
-        // controller: PageController(initialPage: 5),
-        itemBuilder: (context, index) {
-          return NewsContainer(
-              imgUrl: "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/JG4MZ2LKX5MAHEKSPILWEGD3C4.jpg",
-              newsHead: "Tesla to lose \$7,500 consumer tax credits for some Model 3 vehicles",
-              newsDesc: "The U.S. Treasury issued guidelines earlier this month detailing new battery sourcing restrictions that take effect Jan. 1 aimed at weaning the U.S. electric vehicle supply chain away from China. Tax credit will end for Model 3 Rear-Wheel Drive and Model 3 Long Range on Dec. 31, 2023 based on current view of new IRA guidance. Take delivery by Dec. 31 for full tax credit, the company said in a notice on its website. Tesla did not immediately respond to a Reuters' request for comment. In April, the Treasury said new guidelines will slash the credits for the EV maker's Model 3 RWD by half to \$3,750 but that other Tesla models will retain the entire benefit.",
-              newsUrl: "https://www.reuters.com/business/autos-transportation/tesla-lose-7500-consumer-tax-credits-some-model-3-vehicles-2023-12-13/");
+      body: FutureBuilder<List<NewsArticle>>(
+        future: _newsArticles,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No news found'));
+          } else {
+            final newsArticles = snapshot.data!;
+            return PageView.builder(
+              scrollDirection: Axis.vertical,
+              itemCount: newsArticles.length,
+              itemBuilder: (context, index) {
+                final article = newsArticles[index];
+                return NewsContainer(
+                  imgUrl: article.imgUrl,
+                  newsHead: article.newsHead,
+                  newsDesc: article.newsDesc,
+                  newsUrl: article.newsUrl,
+                );
+              },
+            );
+          }
         },
-        itemCount: 10,
       ),
     );
   }
